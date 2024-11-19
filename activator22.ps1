@@ -1,4 +1,5 @@
-if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
+$process = Get-Process -Id $PID
+if ($process.MainWindowHandle -ne 0) {
     Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" 
     exit
 }
