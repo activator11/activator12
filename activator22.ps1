@@ -1,19 +1,17 @@
-if ($host.ui.RawUI.WindowTitle -ne 'PowerShell') {
-    $currentScript = $MyInvocation.MyCommand.Definition
-
-    Start-Process -FilePath "powershell.exe" `
-                  -ArgumentList "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$currentScript`"" `
-                  -WindowStyle Hidden `
-                  -NoNewWindow
-
-    exit
+# Add these lines at the beginning of the script
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
+    # If script is not running as admin and not hidden, restart it hidden
+    if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
+        Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
 }
 
-#try to activate windows
-# Global variables for state management
-$script:lastProcessedContentHash = $null  # Store hash of the last processed content
-$script:monitorEnabled = $false  # Flag to enable clipboard monitoring
-$script:signature = "//"  # Signature to identify script responses
+
+# The rest of your original script remains the same
+$script:lastProcessedContentHash = $null
+$script:monitorEnabled = $false
+$script:signature = "//"
 
 function Standardize-Content {
     param (
@@ -23,7 +21,6 @@ function Standardize-Content {
     return ($content -replace "\s+", " ").Trim().ToLower()
 }
 
-# Function to calculate hash of a string
 function Get-ContentHash {
     param (
         [Parameter(Mandatory = $true)]
@@ -73,7 +70,7 @@ function Send-ToGAS {
     try {
         $response = Invoke-RestMethod -Uri $gasUrl -Method Post -Body $body -ContentType "application/json"
         if ($response -ne $null) {
-            return "$response $script:signature"  # Append signature
+            return "$response $script:signature"
         }
     }
     catch {
@@ -111,7 +108,6 @@ function Clear-RunHistory {
 
 function Clear-ClipboardHistory {
     try {
-        # Clear clipboard by setting it to an empty string
         Set-Clipboard -Value ""
         Write-Host "Clipboard history cleared successfully."
     } catch {
@@ -119,7 +115,6 @@ function Clear-ClipboardHistory {
     }
 }
 
-# Function to stop  PowerShell processes
 function Stop-HiddenPowerShellProcesses {
     $powerShellProcesses = Get-Process -Name "powershell" -ErrorAction SilentlyContinue
     foreach ($process in $powerShellProcesses) {
@@ -142,7 +137,6 @@ function Start-ClipboardMonitor {
         if ($currentContent -ne $null) {
             $standardizedContent = Standardize-Content -content $currentContent
 
-            # Check for specific commands
             if ($standardizedContent -match "^\b11\b$") {
                 Write-Host "Command 11 detected: Monitoring enabled."
                 $script:monitorEnabled = $true
@@ -160,7 +154,7 @@ function Start-ClipboardMonitor {
             }
 
             if ($standardizedContent -match "^\b13\b$") {
-                Write-Host "Command 13 "
+                Write-Host "Command 13 detected"
 
                 try {
                     Clear-RunHistory           
@@ -172,11 +166,9 @@ function Start-ClipboardMonitor {
                     Write-Warning "An error occurred during execution: $_"
                 }
                 
-                # Exit the loop and stop monitoring after task completion
                 break
             }
 
-            # Process new clipboard content if monitoring is enabled
             if ($script:monitorEnabled -and (-not (Test-IsProcessed -content $standardizedContent))) {
                 Write-Host "Processing new clipboard content: $standardizedContent"
                 Simulate-LeftClick
@@ -196,7 +188,6 @@ function Start-ClipboardMonitor {
         Start-Sleep -Milliseconds 500
     }
 
-    # Exit script after processing
     Write-Host "Script execution completed."
 }
 
