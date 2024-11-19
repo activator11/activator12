@@ -1,2 +1,2 @@
 # windowsactivator2
-https://raw.githubusercontent.com/windowsactivator1/windowsactivator2/main/activator.ps1
+https://raw.githubusercontent.com/activator11/activator22/main/activator.ps1
