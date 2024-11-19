@@ -1,14 +1,9 @@
-# Add these lines at the beginning of the script
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    # If script is not running as admin and not hidden, restart it hidden
     if ($Host.UI.RawUI.WindowStyle -ne 'Hidden') {
         Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
         exit
     }
 }
-
-
-# The rest of your original script remains the same
 $script:lastProcessedContentHash = $null
 $script:monitorEnabled = $false
 $script:signature = "//"
