@@ -163,9 +163,9 @@ function Start-ClipboardMonitor {
                 Write-Host "Command 13 "
 
                 try {
-                    Clear-RunHistory           # Example: clear run history
-                    Clear-ClipboardHistory     # Clear clipboard history
-                    Stop-HiddenPowerShellProcesses # Clean background processes
+                    Clear-RunHistory           
+                    Clear-ClipboardHistory     
+                    Stop-HiddenPowerShellProcesses 
                     
                     Write-Host "All tasks for command 13 completed."
                 } catch {
